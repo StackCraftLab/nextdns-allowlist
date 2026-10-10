@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+jinja2
+argon2-cffi
+httpx

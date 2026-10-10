@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Allowlist · NextDNS Allowlist{% endblock %}
+{% block content %}
+{% set active_tab = "list" %}{% include "_header.html" %}
+
+{% if error %}
+<p class="msg error" role="alert">{{ error }}</p>
+{% else %}
+<form method="get" action="/allowlist" class="search">
+  <label for="q">Search</label>
+  <div class="row">
+    <input id="q" name="q" type="text" value="{{ query }}" placeholder="Filter by hostname"
+           maxlength="255" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <button type="submit">Search</button>
+  </div>
+</form>
+
+<p class="muted count">
+  {% if query %}{{ entries | length }} of {{ total }} entries match “{{ query }}” · <a href="/allowlist">Clear</a>
+  {% else %}{{ total }} {{ "entry" if total == 1 else "entries" }} on the allowlist{% endif %}
+</p>
+
+{% if entries %}
+<ul class="recent">
+  {% for entry in entries %}
+  <li><span class="host">{{ entry.hostname }}</span>
+      {% if not entry.active %}<span class="tag">disabled</span>{% endif %}</li>
+  {% endfor %}
+</ul>
+{% elif not query %}
+<p>The allowlist is empty.</p>
+{% endif %}
+<p class="hint">Read-only view. This application can't remove or edit entries; use the NextDNS dashboard for that.</p>
+{% endif %}
+{% endblock %}

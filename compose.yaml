@@ -1,0 +1,89 @@
+name: nextdns-allowlist
+
+services:
+  app:
+    build: .
+    image: nextdns-allowlist:latest
+    env_file: .env
+    environment:
+      APP_DATABASE_PATH: /data/app.db
+      # Only these proxy addresses may set X-Forwarded-For / X-Forwarded-Proto:
+      # .1 = Docker gateway (a reverse proxy on the host), .10 = the optional Caddy service below.
+      FORWARDED_ALLOW_IPS: "172.31.250.1,172.31.250.10"
+    # Reachable only from the host itself; put an HTTPS reverse proxy in front.
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - app-data:/data
+    networks:
+      proxy:
+        ipv4_address: 172.31.250.2
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+          pids: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Alternative to keeping the API key in .env: Docker secrets.
+    # 1. Remove NEXTDNS_API_KEY / APP_SECRET_KEY from .env
+    # 2. Uncomment below and the top-level `secrets:` block.
+    # secrets: [nextdns_api_key, app_secret_key]
+    # environment:
+    #   NEXTDNS_API_KEY_FILE: /run/secrets/nextdns_api_key
+    #   APP_SECRET_KEY_FILE: /run/secrets/app_secret_key
+
+  # Optional bundled HTTPS proxy with automatic Let's Encrypt certificates.
+  # Start with: docker compose --profile caddy up -d
+  caddy:
+    profiles: ["caddy"]
+    image: caddy:2.10-alpine
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-allowlist.example.com}
+    networks:
+      proxy:
+        ipv4_address: 172.31.250.10
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+
+networks:
+  proxy:
+    ipam:
+      config:
+        - subnet: 172.31.250.0/24
+          gateway: 172.31.250.1
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:
+
+# secrets:
+#   nextdns_api_key:
+#     file: ./secrets/nextdns_api_key
+#   app_secret_key:
+#     file: ./secrets/app_secret_key

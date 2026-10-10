@@ -1,0 +1,9 @@
+# Caddy obtains and renews a TLS certificate for {$APP_DOMAIN} automatically.
+{$APP_DOMAIN} {
+	encode gzip
+	request_body {
+		max_size 16KB
+	}
+	reverse_proxy app:8000
+	header -Server
+}

@@ -1,0 +1,10 @@
+# Traefik (v3) alternative: merge these labels into the `app` service in compose.yaml
+# and attach the service to Traefik's network. Add Traefik's container IP to FORWARDED_ALLOW_IPS.
+services:
+  app:
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.allowlist.rule=Host(`allowlist.example.com`)
+      - traefik.http.routers.allowlist.entrypoints=websecure
+      - traefik.http.routers.allowlist.tls.certresolver=letsencrypt
+      - traefik.http.services.allowlist.loadbalancer.server.port=8000

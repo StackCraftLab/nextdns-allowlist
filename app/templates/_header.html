@@ -1,0 +1,12 @@
+<header class="top">
+  <h1>NextDNS Allowlist</h1>
+  <form method="post" action="/logout">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="link">Log out</button>
+  </form>
+</header>
+<p class="muted">Signed in as <strong>{{ username }}</strong> · profile <code>{{ profile_id }}</code></p>
+<nav class="tabs">
+  <a href="/"{% if active_tab == "add" %} aria-current="page"{% endif %}>Add hostname</a>
+  <a href="/allowlist"{% if active_tab == "list" %} aria-current="page"{% endif %}>View allowlist</a>
+</nav>

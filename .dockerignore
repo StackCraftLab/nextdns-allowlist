@@ -1,0 +1,6 @@
+# Keep the build context minimal and free of secrets.
+*
+!app/
+!requirements.txt
+**/__pycache__
+**/*.pyc

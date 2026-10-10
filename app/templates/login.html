@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Sign in · NextDNS Allowlist{% endblock %}
+{% block content %}
+<h1>NextDNS Allowlist</h1>
+<p class="muted">Sign in to continue.</p>
+{% if not configured %}
+<p class="msg error" role="alert">No administrator account has been set up yet. See the README for the <code>set-password</code> command.</p>
+{% endif %}
+{% if error %}<p class="msg error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="/login" autocomplete="on">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label for="username">Username</label>
+  <input id="username" name="username" type="text" autocomplete="username" maxlength="64" required autofocus>
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" autocomplete="current-password" maxlength="1024" required>
+  <button type="submit">Sign in</button>
+</form>
+{% endblock %}
